@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bütçem</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <!-- FontAwesome & Chart.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+</head>
+<body class="theme-dark color-green">
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar glass-panel">
+        <div class="sidebar-header">
+            <h3>Kişisel Gelir Gider<br>Takip Uygulaması</h3>
+            <button class="close-sidebar" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-content">
+            <div class="welcome-msg">Hoşgeldin Tayfun!</div>
+            <ul class="sidebar-menu">
+                <li onclick="switchPage('analiz'); toggleSidebar()"><i class="fas fa-chart-pie"></i> Analiz</li>
+                <li onclick="switchPage('islemler'); toggleSidebar()"><i class="fas fa-exchange-alt"></i> İşlemler</li>
+                <li onclick="switchPage('kasa'); toggleSidebar()"><i class="fas fa-vault"></i> Kasa</li>
+                <li onclick="switchPage('taksitler'); toggleSidebar()"><i class="fas fa-calendar-alt"></i> Taksitlendirme</li>
+                <li onclick="switchPage('sabitler'); toggleSidebar()"><i class="fas fa-thumbtack"></i> Sabit Giderler</li>
+                <li onclick="switchPage('ayarlar'); toggleSidebar()"><i class="fas fa-cog"></i> Ayarlar</li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <div class="signature">Tayfun AKTAŞ</div>
+            <div class="copyright">Tüm hakları saklıdır © 2026</div>
+        </div>
+    </div>
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main App -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="top-header glass-card">
+            <div class="avatar" onclick="toggleSidebar()">T</div>
+            <div class="date-selectors">
+                <div class="custom-select" id="month-select" onclick="toggleSelect('month-dropdown')">
+                    <span id="selected-month">Mayıs</span> <i class="fas fa-chevron-down"></i>
+                    <div class="select-dropdown glass-card" id="month-dropdown"></div>
+                </div>
+                <div class="custom-select" id="year-select" onclick="toggleSelect('year-dropdown')">
+                    <span id="selected-year">2026</span> <i class="fas fa-chevron-down"></i>
+                    <div class="select-dropdown glass-card" id="year-dropdown"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Pages -->
+        <main class="page-content">
+            
+            <!-- Analiz Sayfası -->
+            <section id="page-analiz" class="page active">
+                <div class="glass-card balance-card">
+                    <p class="label">Mevcut Kasa Bakiyesi</p>
+                    <h2 id="analiz-kasa-bakiye">0,00 TL</h2>
+                    <p class="diff-label" id="analiz-kasa-fark">Geçen aya göre: <span class="positive">+0,00 TL</span></p>
+                </div>
+                <div class="glass-card chart-card mt-15">
+                    <p class="label">Yıl Sonu Hedef Durumu</p>
+                    <p class="target-amount" id="analiz-hedef-kalan">Kalan: 0,00 TL</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="hedef-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="grid-2 mt-15">
+                    <div class="glass-card stat-card">
+                        <p class="label">Aylık Gelir</p>
+                        <h3 class="positive" id="analiz-aylik-gelir">0,00 TL</h3>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <p class="label">Aylık Gider</p>
+                        <h3 class="negative" id="analiz-aylik-gider">0,00 TL</h3>
+                    </div>
+                </div>
+                <div class="glass-card stat-card mt-15">
+                    <p class="label">Yıllık Ortalama Analiz</p>
+                    <div class="flex-between mt-10">
+                        <span>Ortalama Gelir:</span>
+                        <strong class="positive" id="analiz-ort-gelir">0,00 TL</strong>
+                    </div>
+                    <div class="flex-between mt-5">
+                        <span>Ortalama Gider:</span>
+                        <strong class="negative" id="analiz-ort-gider">0,00 TL</strong>
+                    </div>
+                </div>
+                <div class="glass-card mt-15">
+                    <p class="label mb-10">Aylık Detaylar</p>
+                    <ul class="detail-list" id="analiz-detay-liste">
+                        <!-- JS ile doldurulacak -->
+                    </ul>
+                </div>
+                <div class="grid-2 mt-15 mb-30">
+                    <div class="glass-card chart-container">
+                        <canvas id="gelirChart"></canvas>
+                    </div>
+                    <div class="glass-card chart-container">
+                        <canvas id="giderChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- İşlemler Sayfası -->
+            <section id="page-islemler" class="page">
+                <div class="glass-card balance-card">
+                    <p class="label">Aylık Net Bakiye</p>
+                    <h2 id="islemler-net-bakiye">0,00 TL</h2>
+                </div>
+                <div class="tabs mt-15 glass-card p-5">
+                    <div class="tab active" onclick="switchTab('islemler', 'gelirler')">Gelirler</div>
+                    <div class="tab" onclick="switchTab('islemler', 'giderler')">Giderler</div>
+                    <div class="tab" onclick="switchTab('islemler', 'yatirimlar')">Yatırımlar</div>
+                </div>
+                <button class="btn-primary full-width mt-15 glass-btn" onclick="openModal('islemEkleModal')">
+                    <i class="fas fa-plus"></i> İşlem Ekle
+                </button>
+                <div class="list-container mt-15" id="islemler-liste">
+                    <!-- İşlemler listesi -->
+                </div>
+            </section>
+
+            <!-- Diğer sayfaların temel yapıları (Kasa, Taksitler, Sabitler, Ayarlar) -->
+            <!-- Ayarlar Sayfası -->
+            <section id="page-ayarlar" class="page">
+                <div class="glass-card mt-15">
+                    <p class="label">Yıl Sonu Hedefi</p>
+                    <input type="number" id="ayar-hedef" class="glass-input mt-10" placeholder="Tutar Giriniz...">
+                    <button class="btn-primary mt-10" onclick="saveTarget()">Kaydet</button>
+                </div>
+                
+                <div class="glass-card mt-15">
+                    <p class="label">Kategori Ekleme</p>
+                    <div class="custom-select mt-10" id="kategori-tur" onclick="toggleSelect('kat-dropdown')">
+                        <span id="secili-kategori-tur">Gelir</span>
+                        <div class="select-dropdown glass-card" id="kat-dropdown">
+                            <div onclick="selectKategoriTur('Gelir')">Gelir</div>
+                            <div onclick="selectKategoriTur('Gider')">Gider</div>
+                            <div onclick="selectKategoriTur('Yatırım')">Yatırım</div>
+                        </div>
+                    </div>
+                    <input type="text" id="yeni-kategori-ad" class="glass-input mt-10" placeholder="Kategori Adı">
+                    <button class="btn-primary mt-10" onclick="addCategory()">Ekle</button>
+                    
+                    <ul class="category-list mt-15" id="kategori-listesi"></ul>
+                </div>
+
+                <div class="glass-card mt-15 mb-30">
+                    <p class="label">Arayüz Yapılandırma</p>
+                    <div class="theme-toggle mt-10" onclick="toggleTheme()">
+                        Açık / Koyu Tema Değiştir <i class="fas fa-adjust"></i>
+                    </div>
+                    <div class="color-picker mt-15">
+                        <div class="color-dot red" onclick="setAccent('red')"></div>
+                        <div class="color-dot blue" onclick="setAccent('blue')"></div>
+                        <div class="color-dot orange" onclick="setAccent('orange')"></div>
+                        <div class="color-dot green" onclick="setAccent('green')"></div>
+                        <div class="color-dot yellow" onclick="setAccent('yellow')"></div>
+                        <div class="color-dot purple" onclick="setAccent('purple')"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Kasa, Taksitler, Sabitler için boş containerlar eklenecek, JS ile render edilecek -->
+            <section id="page-kasa" class="page">
+                <div class="glass-card balance-card text-center">
+                    <p class="label">Toplam Kasa Nakit</p>
+                    <h2 id="kasa-toplam">0,00 TL</h2>
+                </div>
+                <div class="grid-2 mt-15">
+                    <button class="btn-primary glass-btn positive-bg" onclick="openModal('kasaIslemModal', 'giris')"><i class="fas fa-arrow-down"></i> Giriş</button>
+                    <button class="btn-primary glass-btn negative-bg" onclick="openModal('kasaIslemModal', 'cikis')"><i class="fas fa-arrow-up"></i> Çıkış</button>
+                </div>
+                <div class="glass-card mt-15">
+                    <p class="label">Kasa Dışı Portföy</p>
+                    <input type="number" id="kasa-portfoy" class="glass-input mt-10" placeholder="Portföy Tutarı">
+                    <button class="btn-primary mt-10" onclick="updatePortfolio()">Güncelle</button>
+                </div>
+                <div class="list-container mt-15" id="kasa-liste"></div>
+            </section>
+
+            <section id="page-taksitler" class="page">
+                <button class="btn-primary full-width mt-15 glass-btn" onclick="openModal('taksitEkleModal')">
+                    <i class="fas fa-plus"></i> Yeni İşlem Ekle
+                </button>
+                <div class="list-container mt-15" id="taksitler-liste"></div>
+            </section>
+
+            <section id="page-sabitler" class="page">
+                <div class="tabs mt-15 glass-card p-5">
+                    <div class="tab active" onclick="switchTab('sabitler', 'giderler')">Giderler</div>
+                    <div class="tab" onclick="switchTab('sabitler', 'yatirimlar')">Yatırımlar</div>
+                </div>
+                <button class="btn-primary full-width mt-15 glass-btn" onclick="openModal('sabitEkleModal')">
+                    <i class="fas fa-plus"></i> İşlem Ekle
+                </button>
+                <div class="list-container mt-15" id="sabitler-liste"></div>
+            </section>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav glass-panel">
+            <a href="#" class="nav-item active" data-page="analiz" onclick="switchPage('analiz')"><i class="fas fa-chart-pie"></i></a>
+            <a href="#" class="nav-item" data-page="islemler" onclick="switchPage('islemler')"><i class="fas fa-exchange-alt"></i></a>
+            <a href="#" class="nav-item" data-page="kasa" onclick="switchPage('kasa')"><i class="fas fa-vault"></i></a>
+            <a href="#" class="nav-item" data-page="taksitler" onclick="switchPage('taksitler')"><i class="fas fa-calendar-alt"></i></a>
+            <a href="#" class="nav-item" data-page="sabitler" onclick="switchPage('sabitler')"><i class="fas fa-thumbtack"></i></a>
+            <a href="#" class="nav-item" data-page="ayarlar" onclick="switchPage('ayarlar')"><i class="fas fa-cog"></i></a>
+        </nav>
+
+    </div>
+
+    <!-- Modallar -->
+    <div class="modal-overlay" id="islemEkleModal">
+        <div class="modal glass-card">
+            <h3 class="mb-15">İşlem Ekle</h3>
+            <div id="islemEkleForm">
+                <div class="custom-select mb-15" onclick="toggleSelect('tur-dropdown')">
+                    <span id="islem-turu-secim">Kategori Seçin</span>
+                    <div class="select-dropdown glass-card" id="tur-dropdown"></div>
+                </div>
+                <input type="number" id="islem-tutar" class="glass-input mb-15" placeholder="Tutar (TL)">
+                <input type="date" id="islem-tarih" class="glass-input mb-15">
+                <input type="text" id="islem-not" class="glass-input mb-15" placeholder="Kısa Not (İsteğe Bağlı)">
+                <div class="grid-2">
+                    <button class="btn-primary glass-btn negative-bg" onclick="closeModal('islemEkleModal')">İptal</button>
+                    <button class="btn-primary glass-btn positive-bg" onclick="saveIslem()">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
